@@ -1,0 +1,21 @@
+# Self-hosted deployment of the Nuvio website + admin console + licence API.
+#   cp web/.env.example web/.env   # then edit it
+#   docker compose up -d --build
+services:
+  web:
+    build:
+      context: ./web
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+        NEXT_PUBLIC_PURCHASE_URL: ${NEXT_PUBLIC_PURCHASE_URL:-}
+    env_file: ./web/.env
+    environment:
+      DATABASE_URL: file:/app/data/nuvio.db
+    ports:
+      - '3000:3000'
+    volumes:
+      - nuvio-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  nuvio-data:
