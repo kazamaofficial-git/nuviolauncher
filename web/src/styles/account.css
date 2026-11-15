@@ -1,0 +1,13 @@
+.auth-wrap { display: grid; place-items: center; padding: 48px 16px; }
+.auth-card { width: min(440px, 100%); padding: 28px; display: grid; gap: 16px; border-radius: 20px; }
+.auth-card h1 { margin: 0; font-family: var(--font-display, inherit); }
+.center-text { text-align: center; }
+.otp { letter-spacing: 0.5em; text-align: center; font-size: 1.4rem; }
+.otp-show { font-family: var(--font-display, monospace); font-size: 2rem; letter-spacing: 0.2em; color: var(--neon); margin: 4px 0; }
+.account-grid { display: grid; grid-template-columns: 280px 1fr; gap: 20px; padding: 40px 16px; align-items: start; }
+.account-grid .panel { padding: 20px; border-radius: 18px; }
+.stack-lg { display: grid; gap: 20px; }
+.skin-canvas { image-rendering: pixelated; max-width: 100%; height: auto; }
+.check { display: flex; gap: 10px; align-items: center; }
+code { word-break: break-all; }
+@media (max-width: 760px) { .account-grid { grid-template-columns: 1fr; } }
