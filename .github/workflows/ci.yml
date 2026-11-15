@@ -1,0 +1,47 @@
+# Quick checks on every push / pull request: Flutter tests and the website build.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  app:
+    name: App (analyze + test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: scripts/ci/prepare-flutter.sh android
+      - name: Analyze
+        working-directory: app
+        run: flutter analyze --no-fatal-infos
+      - name: Test
+        working-directory: app
+        run: flutter test
+
+  web:
+    name: Web (typecheck + build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    env:
+      DATABASE_URL: file:./ci.db
+      SESSION_SECRET: ci-only-secret-ci-only-secret-ci-only
+      NEXT_PUBLIC_SITE_URL: https://example.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run typecheck
+      - run: npm run build
