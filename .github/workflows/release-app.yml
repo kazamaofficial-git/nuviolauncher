@@ -69,7 +69,7 @@ jobs:
           cache: true
 
       - name: Prepare project
-        run: scripts/ci/prepare-flutter.sh windows
+        run: bash scripts/ci/prepare-flutter.sh windows
 
       - name: Test
         working-directory: app
@@ -126,7 +126,7 @@ jobs:
           cache: true
 
       - name: Prepare project
-        run: scripts/ci/prepare-flutter.sh android
+        run: bash scripts/ci/prepare-flutter.sh android
 
       - name: Test
         working-directory: app
@@ -151,7 +151,7 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           mkdir -p dist
-          scripts/ci/sign-apk.sh \
+          bash scripts/ci/sign-apk.sh \
             app/build/app/outputs/flutter-apk/app-release.apk \
             "dist/Nuvio-Launcher-${{ needs.meta.outputs.version }}.apk"
 
