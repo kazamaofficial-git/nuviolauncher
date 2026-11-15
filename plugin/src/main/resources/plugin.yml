@@ -1,0 +1,6 @@
+name: NuvioSkins
+main: tech.kazama.nuvioskins.NuvioSkinsPlugin
+version: ${project.version}
+api-version: '1.20'
+author: Kazama Tech
+description: Shows the skin and cape of Nuvio accounts.
