@@ -1,0 +1,153 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// A Nuvio Plus licence key. `features` is a comma separated list (e.g. "plus").
+model License {
+  id          String       @id @default(cuid())
+  key         String       @unique
+  plan        String       @default("plus")
+  features    String       @default("plus")
+  maxDevices  Int          @default(2)
+  /// null = lifetime
+  expiresAt   DateTime?
+  /// ACTIVE | REVOKED
+  status      String       @default("ACTIVE")
+  note        String       @default("")
+  email       String       @default("")
+  createdAt   DateTime     @default(now())
+  activations Activation[]
+
+  @@index([status])
+}
+
+/// A device that activated a licence.
+model Activation {
+  id          String   @id @default(cuid())
+  licenseId   String
+  license     License  @relation(fields: [licenseId], references: [id], onDelete: Cascade)
+  deviceId    String
+  deviceName  String   @default("")
+  platform    String   @default("")
+  appVersion  String   @default("")
+  firstSeenAt DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+
+  @@unique([licenseId, deviceId])
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  /// info | warning | success
+  level     String   @default("info")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+/// Community review, shown publicly only when APPROVED.
+model Review {
+  id        String   @id @default(cuid())
+  name      String
+  rating    Int
+  comment   String
+  platform  String   @default("")
+  /// PENDING | APPROVED | HIDDEN
+  status    String   @default("PENDING")
+  ipHash    String   @default("")
+  createdAt DateTime @default(now())
+
+  @@index([status, createdAt])
+}
+
+/// One row per download served by /api/download/[platform].
+model DownloadEvent {
+  id        String   @id @default(cuid())
+  platform  String
+  version   String
+  createdAt DateTime @default(now())
+
+  @@index([platform, createdAt])
+}
+
+/// Nuvio Account (email + password with OTP verification, or Google).
+model User {
+  id            String       @id @default(cuid())
+  email         String       @unique
+  /// Display casing, 3-9 chars [A-Za-z0-9_] so "[Nuvio]" + name fits Minecraft's 16-char limit.
+  username      String
+  usernameLower String       @unique
+  passwordHash  String?
+  googleId      String?      @unique
+  emailVerified Boolean      @default(false)
+  /// Minecraft profile UUID (32 hex, no dashes).
+  profileId     String       @unique
+  /// Show the [Nuvio] badge in the in-game name.
+  badge         Boolean      @default(true)
+  /// classic | slim
+  model         String       @default("classic")
+  skinHash      String?
+  capeHash      String?
+  createdAt     DateTime     @default(now())
+  tokens        AuthToken[]
+  otps          EmailOtp[]
+  joins         SessionJoin[]
+  links         DeviceLink[]
+}
+
+model EmailOtp {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codeHash  String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+/// Launcher / Yggdrasil access token (only its SHA-256 is stored).
+model AuthToken {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash   String   @unique
+  clientToken String   @default("")
+  label       String   @default("")
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+  lastUsedAt  DateTime @default(now())
+
+  @@index([userId])
+}
+
+/// Device-link request started by the launcher and approved on the website.
+model DeviceLink {
+  id         String   @id @default(cuid())
+  deviceHash String   @unique
+  userCode   String   @unique
+  /// PENDING | APPROVED | DENIED | CONSUMED
+  status     String   @default("PENDING")
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime
+}
+
+/// Yggdrasil `join` records consumed by `hasJoined` (short-lived).
+model SessionJoin {
+  id        String   @id @default(cuid())
+  serverId  String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([serverId])
+}
