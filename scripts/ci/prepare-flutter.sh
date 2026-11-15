@@ -5,6 +5,9 @@
 # Usage: scripts/ci/prepare-flutter.sh <android|windows>
 set -euo pipefail
 
+# `python3` does not exist on Windows runners; fall back to `python`.
+PY="$(command -v python3 || command -v python)"
+
 platform="${1:?usage: prepare-flutter.sh <android|windows>}"
 root="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$root/app"
@@ -18,8 +21,8 @@ if [ ! -d "$platform" ]; then
 fi
 
 case "$platform" in
-  android) python3 "$root/scripts/ci/configure_android.py" android/app/src/main/AndroidManifest.xml ;;
-  windows) python3 "$root/scripts/ci/configure_windows.py" windows/runner/Runner.rc ;;
+  android) "$PY" "$root/scripts/ci/configure_android.py" android/app/src/main/AndroidManifest.xml ;;
+  windows) "$PY" "$root/scripts/ci/configure_windows.py" windows/runner/Runner.rc ;;
 esac
 
 flutter pub get
