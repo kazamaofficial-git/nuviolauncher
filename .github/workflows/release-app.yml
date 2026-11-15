@@ -1,0 +1,207 @@
+# Builds the Windows installer and the universal Android APK, then publishes them
+# as a GitHub Release.
+#
+# Trigger: push a tag such as v0.1.0-beta.1 (a "-" in the version marks a pre-release),
+# or run the workflow manually and supply the version.
+name: Release app
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version without the leading v (e.g. 0.1.0-beta.2)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NUVIO_API_BASE: ${{ vars.NUVIO_API_BASE }}
+  MS_CLIENT_ID: ${{ vars.MS_CLIENT_ID }}
+  CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
+
+jobs:
+  meta:
+    name: Resolve version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      tag: ${{ steps.v.outputs.tag }}
+      prerelease: ${{ steps.v.outputs.prerelease }}
+    steps:
+      - id: v
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            version="${{ inputs.version }}"
+          else
+            version="${GITHUB_REF_NAME#v}"
+          fi
+          version="${version#v}"
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::'$version' is not a valid semantic version"; exit 1
+          fi
+          prerelease=false; [[ "$version" == *-* ]] && prerelease=true
+          echo "version=$version"       >> "$GITHUB_OUTPUT"
+          echo "tag=v$version"          >> "$GITHUB_OUTPUT"
+          echo "prerelease=$prerelease" >> "$GITHUB_OUTPUT"
+
+  build-windows:
+    name: Build Windows installer
+    needs: meta
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Prepare project
+        run: scripts/ci/prepare-flutter.sh windows
+
+      - name: Test
+        working-directory: app
+        run: flutter test
+
+      - name: Build
+        working-directory: app
+        run: >
+          flutter build windows --release
+          --build-name=${{ needs.meta.outputs.version }}
+          --build-number=${{ github.run_number }}
+          --dart-define=NUVIO_API_BASE=${NUVIO_API_BASE:-http://localhost:3000}
+          --dart-define=MS_CLIENT_ID=${MS_CLIENT_ID:-}
+          --dart-define=CURSEFORGE_API_KEY=${CURSEFORGE_API_KEY:-}
+
+      - name: Bundle the Visual C++ runtime (app-local)
+        run: |
+          out=app/build/windows/x64/runner/Release
+          for dll in msvcp140.dll vcruntime140.dll vcruntime140_1.dll; do
+            cp "/c/Windows/System32/$dll" "$out/" || echo "::warning::$dll not found"
+          done
+
+      - name: Create installer
+        run: |
+          choco install innosetup -y --no-progress
+          mkdir -p dist
+          "/c/Program Files (x86)/Inno Setup 6/ISCC.exe" \
+            "/DAppVersion=${{ needs.meta.outputs.version }}" \
+            "/DSourceDir=$(cygpath -w "$PWD/app/build/windows/x64/runner/Release")" \
+            "/DOutputDir=$(cygpath -w "$PWD/dist")" \
+            "$(cygpath -w "$PWD/scripts/windows/installer.iss")"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: dist/Nuvio-Launcher-Setup-*.exe
+          if-no-files-found: error
+
+  build-android:
+    name: Build Android APK (universal)
+    needs: meta
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Prepare project
+        run: scripts/ci/prepare-flutter.sh android
+
+      - name: Test
+        working-directory: app
+        run: flutter test
+
+      # No --split-per-abi: one APK carries arm64-v8a, armeabi-v7a and x86_64.
+      - name: Build
+        working-directory: app
+        run: >
+          flutter build apk --release
+          --build-name=${{ needs.meta.outputs.version }}
+          --build-number=${{ github.run_number }}
+          --dart-define=NUVIO_API_BASE=${NUVIO_API_BASE:-http://localhost:3000}
+          --dart-define=MS_CLIENT_ID=${MS_CLIENT_ID:-}
+          --dart-define=CURSEFORGE_API_KEY=${CURSEFORGE_API_KEY:-}
+
+      - name: Sign
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          mkdir -p dist
+          scripts/ci/sign-apk.sh \
+            app/build/app/outputs/flutter-apk/app-release.apk \
+            "dist/Nuvio-Launcher-${{ needs.meta.outputs.version }}.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: dist/Nuvio-Launcher-*.apk
+          if-no-files-found: error
+
+  build-plugin:
+    name: Build server plugin
+    runs-on: ubuntu-latest
+    needs: meta
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17', cache: maven }
+      - run: mvn -B -f plugin/pom.xml package
+      - run: |
+          mkdir -p dist
+          cp plugin/target/NuvioSkins-*.jar "dist/Nuvio-Skins-Plugin-${{ needs.meta.outputs.version }}.jar"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plugin
+          path: dist/Nuvio-Skins-Plugin-*.jar
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs: [meta, build-windows, build-android, build-plugin]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Checksums
+        working-directory: dist
+        run: sha256sum Nuvio-Launcher-* > SHA256SUMS.txt && cat SHA256SUMS.txt
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.meta.outputs.tag }}
+          name: Nuvio Launcher ${{ needs.meta.outputs.version }}
+          prerelease: ${{ needs.meta.outputs.prerelease == 'true' }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            dist/Nuvio-Launcher-Setup-*.exe
+            dist/Nuvio-Launcher-*.apk
+            dist/Nuvio-Skins-Plugin-*.jar
+            dist/SHA256SUMS.txt
