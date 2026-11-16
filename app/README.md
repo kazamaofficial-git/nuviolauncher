@@ -20,7 +20,7 @@ test/          unit tests (no platform channels)
 ```bash
 flutter create --platforms=android,windows --org com.kazamatech --project-name nuvio_launcher .
 python3 ../scripts/configure_platforms.py android/app/src/main/AndroidManifest.xml
-dart run flutter_launcher_icons
+dart run flutter_launcher_icons -f flutter_launcher_icons-android.yaml   # atau -windows.yaml
 ```
 
 ## Run
