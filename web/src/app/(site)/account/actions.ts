@@ -187,7 +187,16 @@ export async function completeGoogleAction(_prev: FormState, fd: FormData): Prom
 export async function updateProfileAction(fd: FormData): Promise<void> {
   const user = await requireUser('/account');
   const model = str(fd, 'model') === 'slim' ? 'slim' : 'classic';
-  await db.user.update({ where: { id: user.id }, data: { badge: fd.get('badge') === 'on', model } });
+  await db.user.update({
+    where: { id: user.id },
+    data: {
+      badge: fd.get('badge') === 'on',
+      hudTab: fd.get('hudTab') === 'on',
+      hudName: fd.get('hudName') === 'on',
+      hudChat: fd.get('hudChat') === 'on',
+      model,
+    },
+  });
   revalidatePath('/account');
 }
 
