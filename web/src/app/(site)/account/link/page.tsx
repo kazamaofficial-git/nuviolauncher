@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { PlayerName } from '@/components/NuvioBadge';
 import { LinkRedirect } from '@/components/account/LinkRedirect';
 import { approveLinkAction, denyLinkAction } from '../actions';
 import { db } from '@/lib/db';
@@ -44,7 +45,7 @@ export default async function LinkPage({ searchParams }: { searchParams: Promise
     <section className="container auth-wrap">
       <div className="auth-card glass center-text">
         <h1>Hubungkan launcher?</h1>
-        <p className="muted">Nuvio Launcher meminta akses ke akun <strong>{displayName(user)}</strong>.</p>
+        <p className="muted">Nuvio Launcher meminta akses ke akun <strong><PlayerName name={displayName(user)} badge={user.badge} /></strong>.</p>
         <p className="otp-show">{link.userCode}</p>
         <p className="muted small">Pastikan kode ini sama dengan yang tampil di launcher.</p>
         <form action={approveLinkAction} className="stack">
