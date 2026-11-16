@@ -4,8 +4,9 @@ Plugin server buatan Kazama Tech — tanpa dependensi pihak ketiga selain Paper 
 Menampilkan skin & cape akun Nuvio kepada semua pemain di server.
 
 ## Cara kerja
-Pemain Nuvio masuk dengan nama `[Nuvio]Username`. Saat login, plugin menanyakan website Nuvio
-(`/api/yggdrasil`) dan menambahkan properti `textures` ke profil pemain. Pemain lain melihatnya
+Pemain Nuvio masuk dengan username Nuvio mereka. Saat login, plugin menanyakan website Nuvio
+(`/api/plugin/profile` dan `/api/yggdrasil`), menambahkan properti `textures` (skin/cape), lalu menampilkan **logo Nuvio**
+(glyph font dari `nuvio-badge-pack.zip`, dikirim ke semua pemain) di nametag, daftar Tab, dan chat sesuai pilihan HUD di halaman akun situs. Pemain lain melihatnya
 selama klien mereka juga memakai Nuvio Launcher (authlib-injector mengizinkan domain tekstur situs).
 
 ## Pasang
