@@ -30,9 +30,9 @@ export function RegisterForm({ next }: { next: string }) {
       <label>Email
         <input className="input" type="email" name="email" autoComplete="email" required />
       </label>
-      <label>Username (3–9 karakter)
-        <input className="input" name="username" autoComplete="username" minLength={3} maxLength={9} pattern="[A-Za-z0-9_]{3,9}" required />
-        <span className="muted small">Nama di game: [Nuvio]Username</span>
+      <label>Username (3–16 karakter)
+        <input className="input" name="username" autoComplete="username" minLength={3} maxLength={16} pattern="[A-Za-z0-9_]{3,16}" required />
+        <span className="muted small">Badge logo Nuvio tampil di samping nama Anda.</span>
       </label>
       <label>Kata sandi
         <input className="input" type="password" name="password" autoComplete="new-password" minLength={8} maxLength={72} required />
@@ -93,8 +93,8 @@ export function CompleteGoogleForm({ next, email }: { next: string; email: strin
     <form action={action} className="stack">
       <input type="hidden" name="next" value={next} />
       <p className="muted small">Masuk sebagai {email}. Pilih username untuk akun Nuvio Anda.</p>
-      <label>Username (3–9 karakter)
-        <input className="input" name="username" minLength={3} maxLength={9} pattern="[A-Za-z0-9_]{3,9}" required />
+      <label>Username (3–16 karakter)
+        <input className="input" name="username" minLength={3} maxLength={16} pattern="[A-Za-z0-9_]{3,16}" required />
       </label>
       <Feedback state={state} />
       <button className="btn btn-block" type="submit" disabled={pending}>{pending ? 'Menyimpan…' : 'Selesai'}</button>
