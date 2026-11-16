@@ -1,11 +1,11 @@
 /// Mod loader a game instance is configured for.
-/// Only [vanilla] can be launched in this beta.
+/// All loaders are resolved to their newest stable version when the instance launches.
 enum LoaderType {
   vanilla('Vanilla', true),
-  fabric('Fabric', false),
-  forge('Forge', false),
-  neoforge('NeoForge', false),
-  quilt('Quilt', false);
+  fabric('Fabric', true),
+  forge('Forge', true),
+  neoforge('NeoForge', true),
+  quilt('Quilt', true);
 
   const LoaderType(this.label, this.isSupported);
 
@@ -30,6 +30,7 @@ class Instance {
     required this.jvmArgs,
     required this.createdAt,
     this.lastPlayed,
+    this.loaderVersion,
   });
 
   final String id;
@@ -42,6 +43,9 @@ class Instance {
   final DateTime createdAt;
   final DateTime? lastPlayed;
 
+  /// Pinned loader version (e.g. from a modpack); null = newest stable.
+  final String? loaderVersion;
+
   Instance copyWith({
     String? name,
     String? versionId,
@@ -50,6 +54,7 @@ class Instance {
     int? ramMb,
     String? jvmArgs,
     DateTime? lastPlayed,
+    String? loaderVersion,
   }) =>
       Instance(
         id: id,
@@ -61,6 +66,7 @@ class Instance {
         jvmArgs: jvmArgs ?? this.jvmArgs,
         createdAt: createdAt,
         lastPlayed: lastPlayed ?? this.lastPlayed,
+        loaderVersion: loaderVersion ?? this.loaderVersion,
       );
 
   Map<String, dynamic> toJson() => {
@@ -73,6 +79,7 @@ class Instance {
         'jvmArgs': jvmArgs,
         'createdAt': createdAt.toIso8601String(),
         'lastPlayed': lastPlayed?.toIso8601String(),
+        'loaderVersion': loaderVersion,
       };
 
   factory Instance.fromJson(Map<String, dynamic> json) => Instance(
@@ -85,5 +92,6 @@ class Instance {
         jvmArgs: json['jvmArgs'] as String? ?? '',
         createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
         lastPlayed: DateTime.tryParse(json['lastPlayed'] as String? ?? ''),
+        loaderVersion: json['loaderVersion'] as String?,
       );
 }
