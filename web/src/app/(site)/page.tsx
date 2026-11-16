@@ -6,6 +6,7 @@ import { IconAndroid, IconCheck, IconShield, IconWindows, featureIcons } from '@
 import { JsonLd } from '@/components/JsonLd';
 import { OrbitalLogo } from '@/components/OrbitalLogo';
 import { ReviewsSection } from '@/components/ReviewsSection';
+import { StatsStrip } from '@/components/StatsStrip';
 import { compareRows, faqs, features, specs } from '@/content/landing';
 import { db } from '@/lib/db';
 import { env } from '@/lib/env';
@@ -90,6 +91,8 @@ export default async function HomePage() {
           <OrbitalLogo />
         </div>
       </section>
+
+      <StatsStrip />
 
       {/* App preview (landscape) */}
       <section className="container preview" aria-label="Pratinjau aplikasi">
