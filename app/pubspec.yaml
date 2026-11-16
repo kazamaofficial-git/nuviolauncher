@@ -32,6 +32,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/brand/icon.png
+    - assets/brand/badge.png
     - assets/wallpapers/
 
 # Launcher icons: see flutter_launcher_icons-android.yaml / -windows.yaml (one per platform, run by CI).
