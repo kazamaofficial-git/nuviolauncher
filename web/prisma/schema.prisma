@@ -90,6 +90,10 @@ model User {
   profileId     String       @unique
   /// Show the [Nuvio] badge in the in-game name.
   badge         Boolean      @default(true)
+  /// HUD: where the badge shows on servers with the NuvioSkins plugin.
+  hudTab        Boolean      @default(true)
+  hudName       Boolean      @default(true)
+  hudChat       Boolean      @default(true)
   /// classic | slim
   model         String       @default("classic")
   skinHash      String?
