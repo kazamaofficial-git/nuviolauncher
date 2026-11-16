@@ -42,6 +42,7 @@ class InstancesController extends ChangeNotifier {
     required String renderer,
     required int ramMb,
     required String jvmArgs,
+    String? loaderVersion,
   }) async {
     if (!canCreate) return null;
     final instance = Instance(
@@ -53,6 +54,7 @@ class InstancesController extends ChangeNotifier {
       ramMb: ramMb,
       jvmArgs: jvmArgs,
       createdAt: DateTime.now(),
+      loaderVersion: loaderVersion,
     );
     _items.add(instance);
     _selectedId ??= instance.id;
