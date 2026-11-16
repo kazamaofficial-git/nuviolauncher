@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { PlayerName } from '@/components/NuvioBadge';
 import { SkinPreview } from '@/components/account/SkinPreview';
 import { TextureUpload } from '@/components/account/TextureUpload';
 import { displayName, inGameName, textureUrl } from '@/lib/account';
@@ -22,7 +23,7 @@ export default async function AccountPage() {
     <section className="container account-grid">
       <aside className="panel glass center-text">
         <SkinPreview skinUrl={skin} capeUrl={cape} />
-        <h2>{displayName(user)}</h2>
+        <h2><PlayerName name={displayName(user)} badge={user.badge} size={24} /></h2>
         <p className="muted small">Nama di game: <code>{inGameName(user)}</code></p>
         <p className="muted small">UUID: <code>{user.profileId}</code></p>
         <form action={logoutAction}><button className="btn btn-ghost btn-sm" type="submit">Keluar</button></form>
@@ -32,7 +33,13 @@ export default async function AccountPage() {
         <div className="panel glass">
           <h2>Profil</h2>
           <form action={updateProfileAction} className="stack">
-            <label className="check"><input type="checkbox" name="badge" defaultChecked={user.badge} /> Tampilkan badge [Nuvio] di nama game</label>
+            <label className="check"><input type="checkbox" name="badge" defaultChecked={user.badge} /> Tampilkan badge logo Nuvio di samping nama</label>
+            <fieldset className="hud-grid">
+              <legend className="muted small">HUD badge di server dengan plugin NuvioSkins</legend>
+              <label className="check"><input type="checkbox" name="hudName" defaultChecked={user.hudName} /> Di atas kepala (nametag)</label>
+              <label className="check"><input type="checkbox" name="hudTab" defaultChecked={user.hudTab} /> Di daftar pemain (Tab)</label>
+              <label className="check"><input type="checkbox" name="hudChat" defaultChecked={user.hudChat} /> Di chat</label>
+            </fieldset>
             <label>Model lengan
               <select className="input" name="model" defaultValue={user.model}>
                 <option value="classic">Classic (Steve)</option>
