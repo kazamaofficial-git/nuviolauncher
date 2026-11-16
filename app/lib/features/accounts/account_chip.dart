@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/widgets/nuvio_badge.dart';
 import '../../core/utils/color_ext.dart';
 import '../../data/models/account.dart';
 import '../shell/navigation_controller.dart';
@@ -39,6 +40,7 @@ class AccountChip extends StatelessWidget {
               children: [
                 SkinHead(url: account?.skinUrl, size: 28),
                 const SizedBox(width: 8),
+                if (account != null && account.type == AccountType.nuvio) const NuvioBadge(size: 16),
                 Flexible(
                   child: Text(
                     account?.shownName ?? 'No account',
