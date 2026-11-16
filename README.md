@@ -57,8 +57,9 @@ tanpa itu Mojang menjawab 403 "Invalid app registration". Detail: `docs/ACCOUNTS
 
 ## Batasan saat ini (jujur)
 * Windows hanya x64/arm64 (Flutter tidak mendukung 32-bit); Android satu APK universal.
-* Peluncuran game baru di Windows. Android: UI, versi, instance, lisensi, akun, konten; runtime JVM + GL belum ada.
-* Loader Forge/NeoForge/Fabric/Quilt dan instalasi modpack belum diimplementasikan.
-* Skin Nuvio di server memerlukan plugin `plugin/` dan server offline-mode; nama game `[Nuvio]Username` (username 3–9 karakter).
+* HUD sentuh (sembunyikan, pengaturan, editor tata letak, auto-hide saat keyboard/mouse fisik dipakai, tanpa input ganda) sudah ada di app, tetapi baru bisa dipakai penuh setelah runtime Android ada.
+* Peluncuran game baru di Windows. Android: UI, versi, instance, lisensi, akun, konten; runtime JVM + GL belum ada (lihat `docs/ANDROID_RUNTIME.md`).
+* Loader Fabric/Quilt/Forge/NeoForge dan modpack (.mrpack + CurseForge) sudah ada di desktop, tetapi belum diuji di perangkat nyata. NeoForge: Minecraft 1.20.2+.
+* Badge Nuvio adalah logo (glyph font dari resource pack kecil), bukan teks. Tampil di nametag/Tab/chat hanya di server dengan plugin `plugin/` (server offline-mode); di singleplayer/LAN tidak ada plugin sehingga yang tampil hanya nama.
 * Protokol `nuvio://` terdaftar di Android; di Windows launcher tetap polling setelah login di browser.
 * Kode belum pernah dikompilasi di lingkungan pembuatan ini; `ci.yml` akan menangkap galat pada run pertama.
