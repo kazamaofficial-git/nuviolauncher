@@ -34,6 +34,7 @@ import 'features/settings/settings_controller.dart';
 import 'features/shell/app_shell.dart';
 import 'features/shell/navigation_controller.dart';
 import 'features/versions/versions_controller.dart';
+import 'features/hud/hud_controller.dart';
 import 'features/wallpaper/wallpaper_background.dart';
 import 'features/wallpaper/wallpaper_controller.dart';
 
@@ -59,6 +60,7 @@ class _NuvioAppState extends State<NuvioApp> {
   late final NavigationController _navigation;
   late final ContentController _content;
   late final WallpaperController _wallpaper;
+  late final HudController _hud;
 
   @override
   void initState() {
@@ -106,6 +108,7 @@ class _NuvioAppState extends State<NuvioApp> {
       client: httpClient,
     );
     _wallpaper = WallpaperController(widget.prefs);
+    _hud = HudController(widget.prefs);
 
     _accounts.init();
     _license.init();
@@ -115,6 +118,7 @@ class _NuvioAppState extends State<NuvioApp> {
   @override
   void dispose() {
     _wallpaper.dispose();
+    _hud.dispose();
     _content.dispose();
     _launch.dispose();
     _accounts.dispose();
@@ -142,6 +146,7 @@ class _NuvioAppState extends State<NuvioApp> {
         ChangeNotifierProvider<NavigationController>.value(value: _navigation),
         ChangeNotifierProvider<ContentController>.value(value: _content),
         ChangeNotifierProvider<WallpaperController>.value(value: _wallpaper),
+        ChangeNotifierProvider<HudController>.value(value: _hud),
       ],
       child: Consumer2<SettingsController, LicenseController>(
         builder: (context, settings, license, _) {
