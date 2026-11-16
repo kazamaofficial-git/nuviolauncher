@@ -1,8 +1,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { PlayerName } from '@/components/NuvioBadge';
 import { navLinks } from '@/lib/site';
 
-export function SiteHeader({ version, userName }: { version?: string; userName?: string | null }) {
+export function SiteHeader({ version, userName, badge }: { version?: string; userName?: string | null; badge?: boolean }) {
   return (
     <header className="site-header">
       <div className="container header-inner glass">
@@ -21,7 +22,7 @@ export function SiteHeader({ version, userName }: { version?: string; userName?:
         </nav>
         <div className="header-cta">
           {userName
-            ? <Link href="/account" className="btn btn-ghost btn-sm">{userName}</Link>
+            ? <Link href="/account" className="btn btn-ghost btn-sm"><PlayerName name={userName} badge={Boolean(badge)} size={16} /></Link>
             : <Link href="/account/login" className="btn btn-ghost btn-sm">Masuk</Link>}
           <Link href="/download" className="btn btn-sm">Unduh</Link>
         </div>
