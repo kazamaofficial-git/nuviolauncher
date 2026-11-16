@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as p;
 
 import '../../data/models/content/content_models.dart';
 import '../../data/models/instance.dart';
@@ -11,6 +12,7 @@ import '../../data/services/content/content_installer.dart';
 import '../../data/services/content/content_provider.dart';
 import '../../data/services/content/curseforge_client.dart';
 import '../../data/services/content/installed_content_service.dart';
+import '../../data/services/content/modpack_installer.dart';
 import '../../data/services/content/modrinth_client.dart';
 import '../instances/instances_controller.dart';
 import '../settings/settings_controller.dart';
@@ -40,6 +42,7 @@ class ContentController extends ChangeNotifier {
             ),
         };
     _installer = installer ?? ContentInstaller(client: httpClient, appVersion: appVersion);
+    _modpacks = ModpackInstaller(client: httpClient, appVersion: appVersion);
     _lastInstanceId = instances.selected?.id;
     _applyInstanceDefaults();
     _instances.addListener(_onInstancesChanged);
@@ -50,6 +53,7 @@ class ContentController extends ChangeNotifier {
   final Duration debounce;
   late final Map<ContentProviderId, ContentProvider> _providers;
   late final ContentInstaller _installer;
+  late final ModpackInstaller _modpacks;
 
   Timer? _debounceTimer;
   String? _lastInstanceId;
@@ -284,6 +288,62 @@ class ContentController extends ChangeNotifier {
       rethrow;
     } on FileSystemException catch (e) {
       throw ContentException('Could not write the file: ${e.message}');
+    }
+  }
+
+  /// Installs a modpack as a **new instance** and returns its name.
+  /// Throws [ContentException] with a user-facing message.
+  Future<String> installModpack(
+    ContentProject project,
+    ContentVersion version, {
+    InstallProgress? onProgress,
+  }) async {
+    if (!_instances.canCreate) {
+      throw const ContentException(
+        'Instance limit reached. Delete an instance or get Nuvio Plus for unlimited instances.',
+      );
+    }
+    final file = version.file;
+    final url = file?.url;
+    if (file == null || url == null || url.isEmpty) {
+      throw ContentException('This pack has no direct download.', openUrl: project.pageUrl);
+    }
+    final root = await _settings.resolveGameRoot();
+    final work = Directory(p.join(root, 'tmp', 'modpack-${DateTime.now().millisecondsSinceEpoch}'));
+    await work.create(recursive: true);
+    try {
+      final prepared = await _modpacks.prepare(
+        packUrl: url,
+        sha1: file.sha1,
+        workDir: work,
+        provider: project.provider,
+        threads: 6,
+      );
+      final plan = prepared.plan;
+      final instance = await _instances.create(
+        name: plan.name,
+        versionId: plan.mcVersion,
+        loader: plan.loader,
+        renderer: 'Auto',
+        ramMb: 4096,
+        jvmArgs: '',
+        loaderVersion: plan.loaderVersion,
+      );
+      if (instance == null) throw const ContentException('Could not create the instance.');
+      await _modpacks.install(
+        plan: plan,
+        archive: prepared.archive,
+        instanceDir: Directory(await _settings.resolveInstanceDir(instance.id)),
+        threads: 6,
+        onProgress: onProgress,
+      );
+      return plan.name;
+    } on FileSystemException catch (e) {
+      throw ContentException('Could not write the modpack: ${e.message}');
+    } finally {
+      try {
+        await work.delete(recursive: true);
+      } catch (_) {}
     }
   }
 
