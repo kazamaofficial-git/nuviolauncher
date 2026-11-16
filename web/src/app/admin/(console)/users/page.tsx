@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { PlayerName } from '@/components/NuvioBadge';
 import { displayName } from '@/lib/account';
 import { db } from '@/lib/db';
 import { formatDate } from '@/lib/format';
@@ -22,7 +23,7 @@ export default async function UsersPage() {
           {users.map((u) => (
             <li key={u.id} className="list-item">
               <div>
-                <strong>{displayName(u)}</strong>{' '}
+                <strong><PlayerName name={displayName(u)} badge={u.badge} /></strong>{' '}
                 {u.googleId && <span className="chip chip-info">Google</span>}{' '}
                 {u.skinHash && <span className="chip">Skin</span>}{' '}
                 {u.capeHash && <span className="chip">Cape</span>}
