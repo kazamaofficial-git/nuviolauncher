@@ -3,13 +3,11 @@ import { z } from 'zod';
 import type { User } from '@prisma/client';
 import { env } from './env';
 
-export const BADGE = '[Nuvio]';
-
-/** 3-9 chars so "[Nuvio]" (7) + name never exceeds Minecraft's 16-char limit. */
+/** Minecraft allows 3-16 chars. The Nuvio badge is a logo glyph, so it takes no characters of the name. */
 export const usernameSchema = z
   .string()
   .trim()
-  .regex(/^[A-Za-z0-9_]{3,9}$/, 'Username 3–9 karakter: huruf, angka, atau _');
+  .regex(/^[A-Za-z0-9_]{3,16}$/, 'Username 3–16 karakter: huruf, angka, atau _');
 
 export const emailSchema = z.string().trim().toLowerCase().email('Email tidak valid').max(120);
 
@@ -41,14 +39,14 @@ export function newProfileId(): string {
   return randomUUID().replace(/-/g, '');
 }
 
-/** The real in-game name (`--username`). */
-export function inGameName(user: Pick<User, 'username' | 'badge'>): string {
-  return user.badge ? `${BADGE}${user.username}` : user.username;
+/** The real in-game name (`--username`). The badge is drawn as a logo, never typed into the name. */
+export function inGameName(user: Pick<User, 'username'>): string {
+  return user.username;
 }
 
-/** What the UI shows, e.g. "[Nuvio] Steve". */
-export function displayName(user: Pick<User, 'username' | 'badge'>): string {
-  return user.badge ? `${BADGE} ${user.username}` : user.username;
+/** Name shown in the UI (the badge itself is rendered as an image next to it). */
+export function displayName(user: Pick<User, 'username'>): string {
+  return user.username;
 }
 
 export function textureUrl(hash: string | null): string | null {
@@ -63,6 +61,7 @@ export function toLauncherProfile(user: User) {
     name: inGameName(user),
     displayName: displayName(user),
     badge: user.badge,
+    hud: { tab: user.hudTab, nametag: user.hudName, chat: user.hudChat },
     model: user.model,
     skinUrl: textureUrl(user.skinHash),
     capeUrl: textureUrl(user.capeHash),
