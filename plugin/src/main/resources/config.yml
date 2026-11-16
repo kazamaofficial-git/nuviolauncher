@@ -1,8 +1,8 @@
 # Base URL of your Nuvio website (the same NUVIO_API_BASE the launcher uses).
 site-url: "https://example.com"
-# Only players whose name starts with this prefix are looked up.
-name-prefix: "[Nuvio]"
 # Seconds to cache a lookup.
 cache-seconds: 300
 # HTTP timeout in seconds. On failure the player simply joins with the default skin.
 timeout-seconds: 4
+# Send the tiny resource pack that contains the Nuvio logo glyph to Nuvio players' clients.
+send-badge-pack: true
