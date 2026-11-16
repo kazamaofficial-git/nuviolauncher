@@ -139,3 +139,8 @@ a.dl-card:hover { transform: translateY(-2px); border-color: var(--neon); box-sh
 .faq details p { padding: 0 22px 20px; margin: 0; color: var(--muted); }
 
 .cta { text-align: center; padding: 48px 24px; background: radial-gradient(100% 140% at 50% 0%, rgba(124, 58, 237, 0.3), var(--surface)); border-color: var(--border-strong); box-shadow: var(--glow-soft); }
+
+.stats-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 8px auto 40px; }
+.stat { padding: 16px; border-radius: 16px; text-align: center; display: grid; gap: 4px; }
+.stat strong { font-family: var(--font-display, inherit); font-size: 1.7rem; color: var(--neon); }
+@media (max-width: 760px) { .stats-strip { grid-template-columns: repeat(2, 1fr); } }
