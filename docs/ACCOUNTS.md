@@ -69,13 +69,13 @@ Call it at startup and before launching; 401 ⇒ account `needsRelogin`.
 
 ### Profile
 ```json
-{ "id": "32 hex chars, no dashes", "username": "Steve", "name": "[Nuvio]Steve",
-  "displayName": "[Nuvio] Steve", "badge": true,
+{ "id": "32 hex chars, no dashes", "username": "Steve", "name": "Steve",
+  "displayName": "Steve", "badge": true,
   "model": "classic|slim", "skinUrl": "https://site/api/textures/<hash>.png|null",
   "capeUrl": "https://site/api/textures/<hash>.png|null" }
 ```
-`name` is the real in-game name (`--username`). Minecraft limits names to 16 chars with no spaces, so
-Nuvio usernames are 3–9 characters `[A-Za-z0-9_]` and the in-game name is `[Nuvio]` + username.
+`name` is the real in-game name (`--username`) = the plain username. The Nuvio badge is a logo glyph, not text:
+usernames are 3–16 characters `[A-Za-z0-9_]`; servers with the NuvioSkins plugin render the logo before the name (nametag, tab, chat, per the player's HUD settings: `hud {nametag, tab, chat}`).
 `displayName` is what the UI shows.
 
 ### Launching a Nuvio account (authlib-injector)
