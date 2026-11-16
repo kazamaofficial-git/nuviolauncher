@@ -89,17 +89,18 @@ class _ContentDetailDialogState extends State<ContentDetailDialog> {
       _message = null;
     });
     try {
-      final path = await widget.controller.install(
-        widget.project,
-        version,
-        onProgress: (received, total) {
-          if (!mounted) return;
-          setState(() => _progress = total == null || total <= 0 ? null : received / total);
-        },
-      );
+      void progress(int received, int? total) {
+        if (!mounted) return;
+        setState(() => _progress = total == null || total <= 0 ? null : received / total);
+      }
+
+      final isPack = widget.project.category == ContentCategory.modpack;
+      final path = isPack
+          ? await widget.controller.installModpack(widget.project, version, onProgress: progress)
+          : await widget.controller.install(widget.project, version, onProgress: progress);
       if (!mounted) return;
       setState(() {
-        _message = 'Installed: $path';
+        _message = isPack ? 'Created instance "$path". Open Instances to play.' : 'Installed: $path';
         _messageIsError = false;
       });
     } on ContentException catch (e) {
@@ -123,7 +124,8 @@ class _ContentDetailDialogState extends State<ContentDetailDialog> {
     final file = v.file;
     final busy = _installingId == v.id;
     final noUrl = file != null && (file.url == null || file.url!.isEmpty);
-    final hasInstance = widget.controller.selectedInstance != null;
+    final isPack = project.category == ContentCategory.modpack;
+    final hasInstance = isPack || widget.controller.selectedInstance != null;
 
     Widget button;
     if (!project.category.installable) {
@@ -145,7 +147,7 @@ class _ContentDetailDialogState extends State<ContentDetailDialog> {
             ? null
             : () => _install(v),
         icon: const Icon(Icons.download_rounded, size: 16),
-        label: const Text('Install'),
+        label: Text(isPack ? 'Install as new instance' : 'Install'),
       );
     }
 
@@ -290,14 +292,6 @@ class _ContentDetailDialogState extends State<ContentDetailDialog> {
                 ),
               ],
             ),
-            if (!project.category.installable)
-              const Padding(
-                padding: EdgeInsets.only(top: 4),
-                child: Text(
-                  'Modpack installation is coming soon in a later beta.',
-                  style: TextStyle(color: AppColors.warning, fontSize: 12),
-                ),
-              ),
             if (_message != null)
               Padding(
                 padding: const EdgeInsets.only(top: 6),
