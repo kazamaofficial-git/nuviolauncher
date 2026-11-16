@@ -59,7 +59,7 @@ class Account {
   /// In-game name (what `--username` receives).
   final String name;
 
-  /// Name shown in the UI when it differs from [name] (Nuvio: `[Nuvio] Steve`).
+  /// Name shown in the UI when it differs from [name] (Nuvio: the name; the UI adds the logo badge).
   final String? displayName;
 
   /// 32 hex characters, no dashes. Empty while a Microsoft account has no profile.
