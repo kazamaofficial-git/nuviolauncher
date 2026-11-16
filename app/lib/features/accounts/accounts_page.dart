@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/widgets/nuvio_badge.dart';
 import '../../core/widgets/glass_card.dart';
 import '../../core/widgets/neon_button.dart';
 import '../../core/widgets/page_header.dart';
@@ -97,10 +98,17 @@ class _AccountCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  account.shownName,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                Row(
+                  children: [
+                    if (account.type == AccountType.nuvio) const NuvioBadge(size: 20),
+                    Flexible(
+                      child: Text(
+                        account.shownName,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 6),
                 Wrap(
