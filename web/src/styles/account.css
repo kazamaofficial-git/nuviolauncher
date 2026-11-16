@@ -11,3 +11,6 @@
 .check { display: flex; gap: 10px; align-items: center; }
 code { word-break: break-all; }
 @media (max-width: 760px) { .account-grid { grid-template-columns: 1fr; } }
+.nuvio-badge { object-fit: contain; vertical-align: -0.2em; margin-right: 0.35em; filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.7)); }
+.player-name { display: inline-flex; align-items: center; }
+.hud-grid { display: grid; gap: 8px; }
