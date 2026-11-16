@@ -13,6 +13,8 @@ import '../../core/widgets/neon_input.dart';
 import '../../core/widgets/page_header.dart';
 import '../../core/widgets/plus_badge.dart';
 import '../license/license_controller.dart';
+import '../hud/hud_controller.dart';
+import '../hud/hud_editor_page.dart';
 import '../wallpaper/wallpaper_picker.dart';
 import 'settings_controller.dart';
 
@@ -106,6 +108,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               ),
             ),
+            const SizedBox(height: 16),
+            const _HudSection(),
             const SizedBox(height: 16),
             GlassCard(
               child: Column(
@@ -238,6 +242,51 @@ class _AccentSwatch extends StatelessWidget {
           boxShadow: [BoxShadow(color: color.fade(0.55), blurRadius: 14)],
         ),
         child: selected ? const Icon(Icons.check_rounded, color: Colors.white) : null,
+      ),
+    );
+  }
+}
+
+/// Touch HUD options: hide, auto-hide with physical input, and the layout editor.
+class _HudSection extends StatelessWidget {
+  const _HudSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final hud = context.watch<HudController>();
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SectionTitle('Controls (HUD)', icon: Icons.gamepad_outlined),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Show on-screen buttons'),
+            value: !hud.hidden,
+            onChanged: (_) => hud.toggleHidden(),
+          ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Auto-hide with keyboard / mouse'),
+            subtitle: const Text('Physical keyboard and mouse work directly, without duplicate input.'),
+            value: hud.autoHide,
+            onChanged: hud.setAutoHide,
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 10,
+            children: [
+              FilledButton.icon(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const HudEditorPage()),
+                ),
+                icon: const Icon(Icons.edit_rounded, size: 18),
+                label: const Text('Edit layout'),
+              ),
+              OutlinedButton(onPressed: hud.resetLayout, child: const Text('Reset')),
+            ],
+          ),
+        ],
       ),
     );
   }
