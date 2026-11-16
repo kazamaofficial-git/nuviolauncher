@@ -11,7 +11,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
     <>
       <Starfield />
       <div className="nebula" aria-hidden="true" />
-      <SiteHeader version={release?.version} userName={user ? displayName(user) : null} />
+      <SiteHeader version={release?.version} userName={user ? displayName(user) : null} badge={user?.badge} />
       <main className="site-main">{children}</main>
       <SiteFooter />
     </>
