@@ -37,8 +37,8 @@ enum ContentCategory {
   /// Loader filters only make sense for mods.
   bool get supportsLoader => this == ContentCategory.mod;
 
-  /// Modpacks (.mrpack) can be browsed but not installed in this beta.
-  bool get installable => installFolder != null;
+  /// Modpacks install as a brand-new instance, everything else into the selected one.
+  bool get installable => installFolder != null || this == ContentCategory.modpack;
 }
 
 /// A mod / pack / world listing entry.
